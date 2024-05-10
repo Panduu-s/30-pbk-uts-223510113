@@ -4,5 +4,5 @@
   background-color: #555;;
   font-family: 'nunito';
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
