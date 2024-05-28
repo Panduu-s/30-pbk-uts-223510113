@@ -10,7 +10,9 @@
       <h1>Postingan user</h1>
       <h2>{{ selectedUserName }}</h2>
       <select v-model="selectedUser" class="selectModel" @change="fetchPosts">
-        <option v-for="user in users" :value="user.id" :key="user.id">{{ user.name }}</option>
+        <option v-for="user in users" :key="user.id" :value="user.id">
+          {{ user.name }}
+        </option>
       </select>
 
       <div v-if="isLoading" class="loading-animation">
@@ -18,10 +20,14 @@
         <span class="loading-message">Memuat postingan ...</span>
       </div>
 
-      <div v-if="!isLoading" class="tweet-container">
+      <div v-else>
         <div v-for="post in posts" :key="post.id" class="tweet">
           <div class="tweet-header">
-            <img src="https://via.placeholder.com/50" alt="User Avatar" class="avatar">
+            <img
+              src="https://via.placeholder.com/50"
+              alt="User Avatar"
+              class="avatar"
+            />
             <div class="user-info">
               <h3>{{ post.title }}</h3>
               <span class="username">@{{ selectedUserName }}</span>
@@ -50,23 +56,23 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from "vue";
 
 const isLoading = ref(false);
 const selectedUser = ref(null);
-const selectedUserName = ref('');
+const selectedUserName = ref("");
 const users = ref([]);
 const posts = ref([]);
 
-const fetchUser = async () => {
+const fetchUsers = async () => {
   try {
     isLoading.value = true;
-    const response = await fetch('https://jsonplaceholder.typicode.com/users');
-    const data = await response.json();
-    users.value = data;
+    const response = await fetch("https://jsonplaceholder.typicode.com/users");
+    users.value = await response.json();
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
   } finally {
     isLoading.value = false;
   }
@@ -74,29 +80,41 @@ const fetchUser = async () => {
 
 const fetchPosts = async () => {
   if (!selectedUser.value) return;
-  isLoading.value = true;
   try {
-    const response = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${selectedUser.value}`);
-    const data = await response.json();
-    posts.value = data;
+    isLoading.value = true;
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/posts?userId=${selectedUser.value}`
+    );
+    posts.value = await response.json();
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error("Error fetching posts:", error);
   } finally {
     isLoading.value = false;
   }
 };
 
+const updateSelectedUserName = () => {
+  const selectedUserObject = users.value.find(
+    (user) => user.id === selectedUser.value
+  );
+  selectedUserName.value = selectedUserObject ? selectedUserObject.name : "";
+};
+
 onMounted(() => {
-  fetchUser();
+  fetchUsers();
 });
 
-watch(selectedUser, () => {
-  posts.value = [];
-  fetchPosts();
-  const selectedUserObject = users.value.find(user => user.id === selectedUser.value);
-  selectedUserName.value = selectedUserObject ? selectedUserObject.name : '';
-}, { immediate: true }); 
+watch(
+  selectedUser,
+  () => {
+    posts.value = [];
+    fetchPosts();
+    updateSelectedUserName();
+  },
+  { immediate: true }
+);
 </script>
+
 
 <style scoped>
 @media (prefers-color-scheme: dark) {

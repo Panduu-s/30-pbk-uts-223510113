@@ -1,90 +1,120 @@
 <template>
-    <div class="container">
-        <header class="header">
-            <nav class="navbar">
-                <router-link to="/" class="active">My To-do List</router-link>
-                <router-link to="/posts">Postingan</router-link>
-            </nav>
-        </header>
-        <div class="todo-app">
-            <h2>My To-Do List</h2>
-            <div class="row">
-                <input type="text" v-model="newTask" placeholder="Tulis Yang Ingin Anda Kerjakan!">
-                <button @click="addTask">Tambahkan</button>
-            </div>
-            <div class="filters">
-                <button @click="hideCompleted = !hideCompleted" class="button-74">
-                    {{ hideCompleted ? 'Tampilkan Yang Selesai' : 'Sembunyikan Yang Selesai' }}
-                </button>
-            </div>
-            <ul style="font-family: Helvetica; text-align: left;">
-                <li v-for="(task, index) in filteredTodos" :key="task.id" :class="{ checked: task.checked }"
-                    @click="toggleTask(task)">
-                    <input type="text" v-model="task.text" v-if="task.editing" @blur="task.editing = false"
-                        @keyup.enter="task.editing = false"
-                        style="font-size: 17px; padding: 12px 8px 12px 50px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);">
-                    <span v-else>{{ task.text }}</span>
-                    <span @click.stop="removeTask(task)" style="float: right;">&#xd7;</span>
-                    <span @click.stop="editTask(task)" style="float: right;">&#9998;</span>
-                </li>
-
-            </ul>
-        </div>
+  <div class="container">
+    <header class="header">
+      <nav class="navbar">
+        <router-link to="/" class="active">My To-do List</router-link>
+        <router-link to="/posts">Postingan</router-link>
+      </nav>
+    </header>
+    <div class="todo-app">
+      <h2>My To-Do List</h2>
+      <div class="row">
+        <input
+          type="text"
+          v-model="newTask"
+          placeholder="Tulis Yang Ingin Anda Kerjakan!"
+        />
+        <button @click="addTask">Tambahkan</button>
+      </div>
+      <div class="filters">
+        <button @click="toggleCompletedVisibility" class="button-74">
+          {{
+            hideCompleted
+              ? "Tampilkan Yang Selesai"
+              : "Sembunyikan Yang Selesai"
+          }}
+        </button>
+      </div>
+      <ul style="font-family: Helvetica; text-align: left">
+        <li
+          v-for="task in filteredTasks"
+          :key="task.id"
+          :class="{ checked: task.checked }"
+          @click="toggleTask(task)"
+        >
+          <input
+            v-if="task.editing"
+            type="text"
+            v-model="task.text"
+            @blur="task.editing = false"
+            @keyup.enter="task.editing = false"
+            style="
+              font-size: 17px;
+              padding: 12px 8px 12px 50px;
+              background-color: #f9f9f9;
+              border-radius: 5px;
+              box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            "
+          />
+          <span v-else>{{ task.text }}</span>
+          <span @click.stop="removeTask(task)" style="float: right">×</span>
+          <span @click.stop="editTask(task)" style="float: right">✎</span>
+        </li>
+      </ul>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 
-const newTask = ref('');
+const newTask = ref("");
 const tasks = ref([]);
 const hideCompleted = ref(false);
 
-const filteredTodos = computed(() => {
-    return hideCompleted.value
-        ? tasks.value.filter((task) => !task.checked)
-        : tasks.value;
+const filteredTasks = computed(() => {
+  return hideCompleted.value
+    ? tasks.value.filter((task) => !task.checked)
+    : tasks.value;
 });
 
-function addTask() {
-    if (newTask.value.trim() === '') {
-        alert("Harus ada isi!");
-    } else {
-        tasks.value.unshift({ id: Date.now(), text: newTask.value, checked: false, editing: false });
-        newTask.value = '';
-        saveData();
-    }
-}
-
-function toggleTask(task) {
-    task.checked = !task.checked;
+const addTask = () => {
+  if (newTask.value.trim() === "") {
+    alert("Harus ada isi!");
+  } else {
+    tasks.value.unshift({
+      id: Date.now(),
+      text: newTask.value,
+      checked: false,
+      editing: false,
+    });
+    newTask.value = "";
     saveData();
-}
+  }
+};
 
-function removeTask(task) {
-    const index = tasks.value.findIndex((t) => t.id === task.id);
-    if (index !== -1) {
-        tasks.value.splice(index, 1);
-        saveData();
-    }
-}
+const toggleTask = (task) => {
+  task.checked = !task.checked;
+  saveData();
+};
 
-function editTask(task) {
-    task.editing = true;
-}
+const removeTask = (task) => {
+  const index = tasks.value.findIndex((t) => t.id === task.id);
+  if (index !== -1) {
+    tasks.value.splice(index, 1);
+    saveData();
+  }
+};
 
-function saveData() {
-    localStorage.setItem("tasks", JSON.stringify(tasks.value));
-}
+const editTask = (task) => {
+  task.editing = true;
+};
 
-function loadData() {
-    const savedTasks = localStorage.getItem("tasks");
-    tasks.value = savedTasks ? JSON.parse(savedTasks) : [];
-}
+const toggleCompletedVisibility = () => {
+  hideCompleted.value = !hideCompleted.value;
+};
+
+const saveData = () => {
+  localStorage.setItem("tasks", JSON.stringify(tasks.value));
+};
+
+const loadData = () => {
+  const savedTasks = localStorage.getItem("tasks");
+  tasks.value = savedTasks ? JSON.parse(savedTasks) : [];
+};
 
 loadData();
 </script>
-
 
 <style scoped>
 @media (prefers-color-scheme: dark) {
