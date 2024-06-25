@@ -4,6 +4,7 @@
       <nav class="navbar">
         <router-link to="/" class="active">My To-do List</router-link>
         <router-link to="/posts">Postingan</router-link>
+        <router-link to="/Albums">Album</router-link>
       </nav>
     </header>
     <div class="posts" id="posts">
